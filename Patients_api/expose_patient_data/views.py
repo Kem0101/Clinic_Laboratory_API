@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 from django.http import JsonResponse
-from .models import Patient, Medical
+from .models import Patient, Medical, Laboratorytest
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -98,5 +98,33 @@ class MedicalView(View):
                         'Medicals': list(medicals.values())}
             else:
                 data = {'message': "Medicals not found..."}
+
+        return JsonResponse(data)
+
+
+class LaboratoryTestView(View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, test_id=0):
+        if test_id > 0:
+            try:
+                laboratorytest = Laboratorytest.objects.filter(
+                    test_id=test_id).first()
+                data = {'message': 'Success',
+                        'laboratory test': model_to_dict(laboratorytest)}
+
+            except Laboratorytest.DoesNotExists:
+                data = {'message': 'Laboratory test not found'}
+
+        else:
+            laboratorytests = Laboratorytest.objects.all()
+            if laboratorytests.exists():
+                data = {'message': 'Success', 'Laboratory tests': list(
+                    laboratorytests.values())}
+
+            else:
+                data = {'message': 'Laboratory tests not found'}
 
         return JsonResponse(data)
