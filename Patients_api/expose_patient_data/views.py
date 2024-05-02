@@ -1,10 +1,11 @@
 from django.shortcuts import render
 from django.views import View
 from django.http import JsonResponse
-from .models import Patient
+from .models import Patient, Medical
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 import json
+from django.forms.models import model_to_dict
 
 # Create your views here.
 
@@ -61,5 +62,41 @@ class PatientView(View):
             data = {'message': "Success"}
         except Patient.DoesNotExist:
             data = {'message': "Patients no found..."}
+
+        return JsonResponse(data)
+
+    def delete(self, request, patient_id):
+
+        try:
+            patient = Patient.objects.get(patient_id=patient_id).delete()
+            data = {'message': "Success"}
+
+        except Patient.DoesNotExist:
+            data = {'message': "Patients no found..."}
+
+        return JsonResponse(data)
+
+
+class MedicalView(View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request, medical_id=0):
+        if medical_id > 0:
+            try:
+                medical = Medical.objects.filter(medical_id=medical_id).first()
+                data = {'message': "Success",
+                        'patient': model_to_dict(medical)}
+
+            except Medical.DoesNotExist:
+                data = {'message': "Patient not found..."}
+        else:
+            medicals = Medical.objects.all()
+            if medicals.exists():
+                data = {'message': "Success",
+                        'Medicals': list(medicals.values())}
+            else:
+                data = {'message': "Medicals not found..."}
 
         return JsonResponse(data)
