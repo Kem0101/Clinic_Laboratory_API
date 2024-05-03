@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from django.views import View
 from django.http import JsonResponse
-from .models import Patient, Medical, Laboratorytest, Testorder
+from .models import Patient, Medical, Laboratorytest, Testorder, Orderdetail
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
 import json
@@ -85,7 +85,7 @@ class MedicalView(View):
     def get(self, request, medical_id=0):
         if medical_id > 0:
             try:
-                medical = Medical.objects.filter(medical_id=medical_id).first()
+                medical = Medical.objects.get(medical_id=medical_id)
                 data = {'message': "Success",
                         'patient': model_to_dict(medical)}
 
@@ -110,12 +110,11 @@ class LaboratoryTestView(View):
     def get(self, request, test_id=0):
         if test_id > 0:
             try:
-                laboratorytest = Laboratorytest.objects.filter(
-                    test_id=test_id).first()
+                laboratorytest = Laboratorytest.objects.get(test_id=test_id)
                 data = {'message': 'Success',
                         'laboratory test': model_to_dict(laboratorytest)}
 
-            except Laboratorytest.DoesNotExists:
+            except Laboratorytest.DoesNotExist:
                 data = {'message': 'Laboratory test not found'}
 
         else:
@@ -138,8 +137,7 @@ class TestOrderView(View):
     def get(self, request, order_id=0):
         if order_id > 0:
             try:
-                testorder = Testorder.objects.filter(
-                    order_id=order_id).first()
+                testorder = Testorder.objects.get(order_id=order_id)
                 data = {'message': 'Success',
                         'Test order': model_to_dict(testorder)}
 
@@ -154,5 +152,26 @@ class TestOrderView(View):
 
             else:
                 data = {'message': 'Test orders not found'}
+
+        return JsonResponse(data)
+
+
+class OrderDetailView(View):
+    @method_decorator(csrf_exempt)
+    def dispatch(self, request, *args, **kwargs):
+        return super().dispatch(request, *args, **kwargs)
+
+    def get(self, request):
+        try:
+            ordersdetail = Orderdetail.objects.all()
+            if ordersdetail.exists():
+                data = {'message': 'Success',
+                        'Orders': list(ordersdetail.values())}
+
+            else:
+                data = {'message': 'Orders detail not found'}
+
+        except:
+            print('Something was wrong')
 
         return JsonResponse(data)

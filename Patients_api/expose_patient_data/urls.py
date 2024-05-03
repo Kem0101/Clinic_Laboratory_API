@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import PatientView, MedicalView, LaboratoryTestView, TestOrderView
+from .views import PatientView, MedicalView, LaboratoryTestView, TestOrderView, OrderDetailView
 
 
 urlpatterns = [
@@ -19,5 +19,8 @@ urlpatterns = [
     path('test-orders/', TestOrderView.as_view(),
          name='test_order_list'),
     path('test-orders/<int:order_id>',
-         TestOrderView.as_view(), name='test_order_list_process')
+         TestOrderView.as_view(), name='test_order_list_process'),
+
+    path('orders-detail/', OrderDetailView.as_view(),
+         name='orders_detail_list'),
 ]
